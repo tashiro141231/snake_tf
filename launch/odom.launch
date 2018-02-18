@@ -1,0 +1,5 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <node name="snake_odom" pkg="snake_tf" type="snake_odom" output="screen">
+  </node>
+</launch>
