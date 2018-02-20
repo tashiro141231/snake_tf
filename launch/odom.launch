@@ -1,5 +1,6 @@
 <!-- -*- mode: XML -*- -->
 <launch>
-  <node name="snake_odom" pkg="snake_tf" type="snake_odom" output="screen">
-  </node>
+  <node name="snake_odom" pkg="snake_tf" type="snake_odom" output="screen"/>
+  <!-- show robot at actual position -->
+  <node pkg="tf" type="static_transform_publisher" name="current_and_snake_frame_connector" args="0 0 0 0 0 0 /Isnake_middle_robot /current_link0 10"/>
 </launch>

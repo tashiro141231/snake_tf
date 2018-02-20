@@ -8,7 +8,8 @@
 #include "snake_odom.h"
 
 // Sensor position and diameter
-#define DIST_COP_SENSOR_POS_X -0.04
+// #define DIST_COP_SENSOR_POS_X -0.04
+#define DIST_COP_SENSOR_POS_X 0
 #define DIST_COP_SENSOR_POS_R 0.045
 
 #define COP_SENSOR_NUM 29
@@ -28,6 +29,7 @@ std::string Snake_odom::frame_id_;
 geometry_msgs::Point Snake_odom::odom_point_;
 geometry_msgs::TransformStamped Snake_odom::odom_theory_;
 geometry_msgs::TransformStamped Snake_odom::robot_FS_frame_;
+geometry_msgs::TransformStamped Snake_odom::robot_link_;
 tf::TransformListener* Snake_odom::listener_;
 // tf::TransformBroadcaster Snake_odom::odom_broadcaster_;
 geometry_msgs::TransformStamped Snake_odom::odom_;
@@ -51,7 +53,8 @@ void Snake_odom::odom_start_Callback(std_msgs::Bool flag) {
 }
 
 void Snake_odom::forefront_position_Callback(const geometry_msgs::TransformStamped forefront_pos) {
-  ROS_INFO("Set robot_FS_frame");
+  // ROS_INFO("Set robot_FS_frame");
+
   odom_theory_ = forefront_pos;
   robot_FS_frame_ = forefront_pos;
   static tf::TransformBroadcaster robot_broadcaster;
@@ -82,13 +85,13 @@ void Snake_odom::collision_position_Callback(snake_msgs_abe::FsensorData cop_dat
       point_buff.y = DIST_COP_SENSOR_POS_R*cos(cop_data.angle[i_link]);
       point_buff.y = DIST_COP_SENSOR_POS_R*sin(cop_data.angle[i_link]);
       cop_data.points_origin.points.push_back(point_buff);
-      if(std::abs(cop_data.force_normal[i_link]) > 0.2) {
+      if(std::abs(cop_data.force_normal[i_link]) > 1.0) {
         cop_data.is_coll.push_back(true);
-        // ROS_INFO("%d: is coll.", i_link);
+        ROS_INFO("%d: is coll.", i_link);
       }
       else {
         cop_data.is_coll.push_back(false);
-        // ROS_INFO("%d: is not coll.", i_link);
+        ROS_INFO("%d: is not coll.", i_link);
       }
     }
   
@@ -98,6 +101,17 @@ void Snake_odom::collision_position_Callback(snake_msgs_abe::FsensorData cop_dat
       cop_data_old_ = cop_data;
       cop_data_old2_ = cop_data;
     }
+    
+    // try {
+    //   listener_->waitForTransform("robot_frame", "Isnake_middle_robot",ros::Time(0), ros::Duration(1.0));
+    //   listener_->waitForTransform("Isnake_middle_robot","current_link0",ros::Time(0), ros::Duration(1.0));
+    // }
+    // catch(tf::TransformException &ex) {
+    //   ROS_ERROR("%s", ex.what());
+    //   ROS_INFO("Does not working.");
+    //   ros::Duration(0.1).sleep();
+    //   return ;
+    // }
     
     for(int i_link=0; i_link < COP_SENSOR_NUM; i_link++) {
       std::string link_id = frame_id_;
@@ -109,7 +123,8 @@ void Snake_odom::collision_position_Callback(snake_msgs_abe::FsensorData cop_dat
       point_stamp_origin.point = Point32_to_Point(cop_data_old_.points_origin.points[i_link]);
   
       try {
-        listener_->waitForTransform("robot_frame", link_id, tf_stamp_old_, ros::Duration(1.0));
+        listener_->waitForTransform("robot_frame", link_id, tf_stamp_old_, ros::Duration(10));
+        // listener_->lookupTransform("robot_frame", link_id, tf_stamp_old_, );
         listener_->transformPoint("robot_frame", point_stamp_origin, point_stamp_fixed);
       }
       catch(tf::TransformException &ex) {
@@ -198,17 +213,3 @@ geometry_msgs::Point32 Snake_odom::Point_to_Point32(geometry_msgs::Point pt){
   return point32;
 }
 
-// void Snake_odom::odom_sendTransForm(double x, double y, double z) {
-//   odom_.header.stamp = cop_data_old_.timestamp;
-//   odom_.header.frame_id = "odom";
-//   odom_.child_frame_id = "roboto_frame";
-//   odom_.transform.translation.x = x;
-//   odom_.transform.translation.y = y;
-//   odom_.transform.translation.z = z;
-//   odom_.transform.rotation.x = 0.0;
-//   odom_.transform.rotation.y = 0.0;
-//   odom_.transform.rotation.z = 0.0;
-//   odom_.transform.totation.w = 1.0;
-//   odom_broadcaster_.sendTransform(odom_);
-// }
-//

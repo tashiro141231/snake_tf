@@ -94,10 +94,6 @@ class Snake_odom{
     static double odom_y_;
     static double odom_z_;
 
-    static double x_;
-    static double y_;
-    static double z_;
-
     static int count_odom_func_;
 
     static std::string frame_id_;
@@ -115,6 +111,7 @@ class Snake_odom{
     static geometry_msgs::Point odom_point_;
     static geometry_msgs::TransformStamped odom_theory_;
     static geometry_msgs::TransformStamped robot_FS_frame_;
+    static geometry_msgs::TransformStamped robot_link_;
     static ros::Time tf_stamp_old_;
     static snake_msgs_abe::FsensorData cop_data_old_;
     static snake_msgs_abe::FsensorData cop_data_old2_;

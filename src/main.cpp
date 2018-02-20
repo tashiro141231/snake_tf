@@ -10,9 +10,13 @@ int main(int argc, char **argv){
   // tf::TransformListener listenerPtr(ros::Duration(10));
   // Snake_odom::set_tf_listener(listenerPtr);
 
-  while(ros::ok()){
-    ros::spinOnce();
-    rate.sleep();
-  }
+  ros::AsyncSpinner spinner(4);
+  spinner.start();
+
+  ros::waitForShutdown();
+  // while(ros::ok()){
+  //   ros::spinOnce();
+  //   rate.sleep();
+  // }
 }
 
